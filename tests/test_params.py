@@ -3,11 +3,10 @@ test_params.py - Tests for Parameter Data Structures
 """
 
 import unittest
-from datetime import datetime, time
+from datetime import time
 
-from core.params import (
-    ProductionLine, SKU, ChangeoverMatrix, Shift, ProductionParams
-)
+from core.params import SKU, ProductionLine, ProductionParams, Shift
+
 
 class TestProductionLine(unittest.TestCase):
     def test_line_speed(self):
@@ -18,7 +17,7 @@ class TestProductionLine(unittest.TestCase):
         )
         self.assertEqual(line.get_speed_for_sku("S1"), 100.0)
         self.assertEqual(line.get_speed_for_sku("S2"), 50.0)
-        
+
     def test_compatibility(self):
         line = ProductionLine(
             line_id="L1", name="Line 1", compatible_skus=["S1"]
@@ -37,7 +36,7 @@ class TestProductionParams(unittest.TestCase):
         )
         # Should not raise
         params.validate()
-        
+
     def test_invalid_line_reference(self):
         params = ProductionParams(
             lines=[ProductionLine("L1", "Line 1", ["S1"])],

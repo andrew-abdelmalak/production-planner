@@ -6,8 +6,6 @@ Modify these values to adjust algorithm behavior without hunting through code.
 """
 
 from dataclasses import dataclass
-from typing import Optional
-
 
 # ========================================
 # CHANGEOVER PENALTIES
@@ -146,10 +144,10 @@ class ChangeoverType:
 def get_changeover_penalty(changeover_type: str) -> float:
     """
     Get the penalty for a specific changeover type.
-    
+
     Args:
         changeover_type: One of ChangeoverType values
-        
+
     Returns:
         Penalty value (lower = better)
     """

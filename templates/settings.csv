@@ -1,0 +1,9 @@
+key,value
+start_date,2026-01-25T06:00:00
+planning_horizon_days,7
+default_changeover_minutes,45
+default_changeover_cost,100
+w_makespan,1.0
+w_changeover,1.0
+w_utilization,0.5
+w_priority,2.0

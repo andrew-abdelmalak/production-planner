@@ -1,0 +1,199 @@
+{
+    "start_date": "2026-02-02T08:00:00",
+    "planning_horizon_days": 7,
+    "settings": {
+        "planning_horizon_days": 7,
+        "daily_cleaning_minutes": 60,
+        "changeover_minutes": 120,
+        "changeover_includes_cleaning_at_day_start": true
+    },
+    "lines": [
+        {
+            "name": "Line 1 (Low Speed)",
+            "efficiency_percent": 91
+        },
+        {
+            "name": "Line 2 (High Speed)",
+            "efficiency_percent": 91
+        },
+        {
+            "name": "Line 3 (Gallon)",
+            "efficiency_percent": 91
+        }
+    ],
+    "skus": [
+        {
+            "name": "330ml Water (Shrink)",
+            "description": "20 bottles/shrink, 150 shrinks/pallet",
+            "demand_units": 500000,
+            "priority": 1,
+            "min_batch_size": 3000,
+            "starting_stock": 50000,
+            "line_speeds": {
+                "Line 1 (Low Speed)": 11520,
+                "Line 2 (High Speed)": 0,
+                "Line 3 (Gallon)": 0
+            }
+        },
+        {
+            "name": "600ml Water (Shrink)",
+            "description": "12 bottles/shrink, 154 shrinks/pallet",
+            "demand_units": 800000,
+            "priority": 2,
+            "min_batch_size": 5000,
+            "starting_stock": 0,
+            "line_speeds": {
+                "Line 1 (Low Speed)": 11520,
+                "Line 2 (High Speed)": 36000,
+                "Line 3 (Gallon)": 0
+            }
+        },
+        {
+            "name": "600ml Water (Carton)",
+            "description": "20 bottles/carton, 96 cartons/pallet",
+            "demand_units": 200000,
+            "priority": 3,
+            "min_batch_size": 5000,
+            "starting_stock": 0,
+            "line_speeds": {
+                "Line 1 (Low Speed)": 11520,
+                "Line 2 (High Speed)": 36000,
+                "Line 3 (Gallon)": 0
+            }
+        },
+        {
+            "name": "1.5L Water (Shrink)",
+            "description": "6 bottles/shrink, 112 shrinks/pallet",
+            "demand_units": 600000,
+            "priority": 2,
+            "min_batch_size": 3000,
+            "starting_stock": 100000,
+            "line_speeds": {
+                "Line 1 (Low Speed)": 10800,
+                "Line 2 (High Speed)": 28000,
+                "Line 3 (Gallon)": 0
+            }
+        },
+        {
+            "name": "1.5L Water (Carton)",
+            "description": "12 bottles/carton, 70 cartons/pallet",
+            "demand_units": 150000,
+            "priority": 3,
+            "min_batch_size": 3000,
+            "starting_stock": 20000,
+            "line_speeds": {
+                "Line 1 (Low Speed)": 10800,
+                "Line 2 (High Speed)": 28000,
+                "Line 3 (Gallon)": 0
+            }
+        },
+        {
+            "name": "Gallon Water",
+            "description": "No secondary packaging, 48 units/pallet",
+            "demand_units": 100000,
+            "priority": 4,
+            "min_batch_size": 500,
+            "starting_stock": 10000,
+            "line_speeds": {
+                "Line 1 (Low Speed)": 0,
+                "Line 2 (High Speed)": 0,
+                "Line 3 (Gallon)": 1000
+            }
+        }
+    ],
+    "shifts": [
+        {
+            "name": "Sat Morning",
+            "day_of_week": 6,
+            "start_time": "09:00",
+            "end_time": "20:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Sat Night",
+            "day_of_week": 6,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Sun Morning",
+            "day_of_week": 0,
+            "start_time": "09:00",
+            "end_time": "20:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Sun Night",
+            "day_of_week": 0,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Mon Morning",
+            "day_of_week": 1,
+            "start_time": "09:00",
+            "end_time": "20:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Mon Night",
+            "day_of_week": 1,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Tue Morning",
+            "day_of_week": 2,
+            "start_time": "09:00",
+            "end_time": "20:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Tue Night",
+            "day_of_week": 2,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Wed Morning",
+            "day_of_week": 3,
+            "start_time": "09:00",
+            "end_time": "20:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Wed Night",
+            "day_of_week": 3,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Thu Morning",
+            "day_of_week": 4,
+            "start_time": "09:00",
+            "end_time": "20:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Thu Night",
+            "day_of_week": 4,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"]
+        },
+        {
+            "name": "Fri Night",
+            "day_of_week": 5,
+            "start_time": "20:00",
+            "end_time": "08:00",
+            "available_lines": ["Line 1 (Low Speed)", "Line 2 (High Speed)", "Line 3 (Gallon)"],
+            "changeover_slot_available": true,
+            "notes": "Friday morning is unused - ideal for changeovers"
+        }
+    ]
+}

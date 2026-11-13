@@ -1,0 +1,109 @@
+{
+  "planning_horizon_days": 7,
+  "start_date": "2026-01-25T06:00:00",
+  "w_makespan": 1.0,
+  "w_changeover": 1.0,
+  "w_utilization": 0.5,
+  "w_priority": 2.0,
+  "lines": [
+    {
+      "line_id": "LINE-A",
+      "name": "High-Speed Bottling",
+      "compatible_skus": ["SKU-001", "SKU-002", "SKU-003"],
+      "base_speed_units_per_hour": 2000,
+      "sku_speed_multipliers": {
+        "SKU-001": 1.0,
+        "SKU-002": 0.9,
+        "SKU-003": 0.85
+      },
+      "max_continuous_hours": 8,
+      "cleaning_time_minutes": 30
+    },
+    {
+      "line_id": "LINE-B",
+      "name": "Flexible Line",
+      "compatible_skus": ["SKU-001", "SKU-002", "SKU-003", "SKU-004", "SKU-005"],
+      "base_speed_units_per_hour": 1200,
+      "sku_speed_multipliers": {},
+      "max_continuous_hours": 8,
+      "cleaning_time_minutes": 45
+    }
+  ],
+  "skus": [
+    {
+      "sku_id": "SKU-001",
+      "name": "Water 500ml",
+      "demand_units": 20000,
+      "priority": 1,
+      "min_batch_size": 500
+    },
+    {
+      "sku_id": "SKU-002",
+      "name": "Sparkling Water",
+      "demand_units": 15000,
+      "priority": 2,
+      "min_batch_size": 500
+    },
+    {
+      "sku_id": "SKU-003",
+      "name": "Orange Juice",
+      "demand_units": 10000,
+      "priority": 2,
+      "min_batch_size": 500
+    },
+    {
+      "sku_id": "SKU-004",
+      "name": "Cola 500ml",
+      "demand_units": 12000,
+      "priority": 3,
+      "min_batch_size": 500
+    },
+    {
+      "sku_id": "SKU-005",
+      "name": "Water 1.5L",
+      "demand_units": 8000,
+      "priority": 3,
+      "min_batch_size": 400
+    }
+  ],
+  "changeover_matrices": [
+    {
+      "line_id": "LINE-A",
+      "changeover_minutes": {
+        "SKU-001,SKU-002": 15,
+        "SKU-002,SKU-001": 20,
+        "SKU-001,SKU-003": 45,
+        "SKU-003,SKU-001": 60
+      },
+      "changeover_cost": {
+        "SKU-001,SKU-002": 50,
+        "SKU-002,SKU-001": 75
+      },
+      "default_minutes": 45,
+      "default_cost": 100
+    },
+    {
+      "line_id": "LINE-B",
+      "changeover_minutes": {},
+      "changeover_cost": {},
+      "default_minutes": 60,
+      "default_cost": 150
+    }
+  ],
+  "shifts": [
+    {
+      "shift_id": "SHIFT-1",
+      "name": "Morning",
+      "start_time": "06:00",
+      "end_time": "14:00",
+      "available_lines": ["LINE-A", "LINE-B"]
+    },
+    {
+      "shift_id": "SHIFT-2",
+      "name": "Afternoon",
+      "start_time": "14:00",
+      "end_time": "22:00",
+      "available_lines": ["LINE-A", "LINE-B"]
+    }
+  ]
+}

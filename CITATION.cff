@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "production-planner: Multi-Line Production Scheduling Optimizer and Gantt Planner"
+abstract: "A Python 3.11+ production scheduling tool using a genetic algorithm, ensemble restart runner, generic CSV/Excel/JSON factory templates, and a PySide6 interactive Gantt desktop interface."
+authors:
+  - family-names: "Abdelmalak"
+    given-names: "Andrew"
+version: "0.1.0"
+date-released: "2026-11-14"
+license: "Apache-2.0"
+repository-code: "https://github.com/andrew-abdelmalak/production-planner"
+keywords:
+  - "production-scheduling"
+  - "genetic-algorithm"
+  - "operations-research"
+  - "manufacturing"
+  - "optimization"
+  - "pyside6"
+  - "openpyxl"

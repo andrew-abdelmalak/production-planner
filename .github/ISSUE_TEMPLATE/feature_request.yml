@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an improvement to scheduling constraints, input formats, CLI flags, or the Gantt UI.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or scheduling need
+      description: Describe the factory constraint, export format, or workflow gap.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: How should the solver, schema, CLI, or GUI handle this?
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and confirmed this is not a duplicate.
+          required: true

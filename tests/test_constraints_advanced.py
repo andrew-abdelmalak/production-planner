@@ -5,14 +5,15 @@ test_constraints_advanced.py - Tests for Advanced Constraints
 import unittest
 from datetime import datetime, time, timedelta
 
-from core.params import (
-    ProductionLine, SKU, Shift, ProductionParams, make_demo_params
-)
-from core.solution import ProductionBlock, LineSolution, ScheduleSolution
 from core.constraints_advanced import (
-    ExclusiveSKUConstraint, ShiftRestrictionConstraint,
-    SequenceRestrictionConstraint, MinRunLengthConstraint
+    ExclusiveSKUConstraint,
+    MinRunLengthConstraint,
+    SequenceRestrictionConstraint,
+    ShiftRestrictionConstraint,
 )
+from core.params import SKU, ProductionLine, ProductionParams, Shift, make_demo_params
+from core.solution import LineSolution, ProductionBlock, ScheduleSolution
+
 
 def make_block(sku_id, line_id, start_hour, end_hour, block_id="B1"):
     base = datetime(2025, 2, 1, 0, 0)
@@ -35,7 +36,7 @@ class TestExclusiveSKU(unittest.TestCase):
         b1 = make_block("SKU-A", "L1", 0, 5, "B1")
         b2 = make_block("SKU-A", "L2", 5, 10, "B2")
         sol = ScheduleSolution([LineSolution("L1", [b1]), LineSolution("L2", [b2])], self.params)
-        
+
         valid, _ = self.constraint.validate(sol)
         self.assertTrue(valid)
 
@@ -44,7 +45,7 @@ class TestExclusiveSKU(unittest.TestCase):
         b1 = make_block("SKU-A", "L1", 0, 5, "B1")
         b2 = make_block("SKU-A", "L2", 2, 7, "B2") # Overlap 2-5
         sol = ScheduleSolution([LineSolution("L1", [b1]), LineSolution("L2", [b2])], self.params)
-        
+
         valid, msg = self.constraint.validate(sol)
         self.assertFalse(valid)
         self.assertIn("SKU-A runs simultaneously", msg[0])
@@ -65,16 +66,16 @@ class TestShiftRestriction(unittest.TestCase):
         base = datetime(2025, 2, 1, 8, 0)
         b1 = ProductionBlock("B1", "L1", "SKU-A", base, base+timedelta(hours=2), 100)
         sol = ScheduleSolution([LineSolution("L1", [b1])], self.params)
-        
+
         valid, _ = self.constraint.validate(sol)
         self.assertTrue(valid)
 
     def test_forbidden_shift(self):
         # 16:00 (4 PM) is in S2 (14-22), not S1
-        base = datetime(2025, 2, 1, 16, 0) 
+        base = datetime(2025, 2, 1, 16, 0)
         b1 = ProductionBlock("B1", "L1", "SKU-A", base, base+timedelta(hours=2), 100)
         sol = ScheduleSolution([LineSolution("L1", [b1])], self.params)
-        
+
         valid, msg = self.constraint.validate(sol)
         self.assertFalse(valid)
         self.assertIn("does not match allowed shifts", msg[0])

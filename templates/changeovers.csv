@@ -1,0 +1,5 @@
+line_id,from_sku,to_sku,changeover_minutes,changeover_cost
+LINE-A,SKU-001,SKU-002,15,50
+LINE-A,SKU-001,SKU-003,45,100
+LINE-A,SKU-002,SKU-001,20,75
+LINE-A,SKU-003,SKU-001,60,100

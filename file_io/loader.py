@@ -5,20 +5,20 @@ Handles loading parameters from JSON files and saving solutions.
 """
 
 from __future__ import annotations
+
 import json
 from datetime import datetime, time
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any
 
 from core.params import (
-    ProductionLine,
     SKU,
     ChangeoverMatrix,
-    Shift,
+    ProductionLine,
     ProductionParams,
+    Shift,
 )
-from core.solution import ProductionBlock, LineSolution, ScheduleSolution
-
+from core.solution import ScheduleSolution
 
 # ========================================
 # JSON Loading
@@ -27,13 +27,13 @@ from core.solution import ProductionBlock, LineSolution, ScheduleSolution
 def load_from_json(file_path: str) -> ProductionParams:
     """
     Load production parameters from a JSON file.
-    
+
     Args:
         file_path: Path to JSON file
-    
+
     Returns:
         ProductionParams: Loaded and validated parameters
-    
+
     Raises:
         FileNotFoundError: If file doesn't exist
         ValueError: If JSON is invalid or missing required fields
@@ -41,17 +41,17 @@ def load_from_json(file_path: str) -> ProductionParams:
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {file_path}")
-    
+
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, encoding='utf-8') as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in file {file_path}: {str(e)}")
-    
+        raise ValueError(f"Invalid JSON in file {file_path}: {str(e)}") from e
+
     return _parse_params(data)
 
 
-def _validate_required_field(data: Dict, field: str, context: str) -> Any:
+def _validate_required_field(data: dict, field: str, context: str) -> Any:
     """Validate that a required field exists and is not None."""
     if field not in data:
         raise ValueError(f"Missing required field '{field}' in {context}")
@@ -62,38 +62,40 @@ def _validate_positive_number(value: Any, field: str, context: str) -> float:
     """Validate that a value is a positive number."""
     try:
         num = float(value)
-    except (TypeError, ValueError):
-        raise ValueError(f"'{field}' in {context} must be a number, got: {type(value).__name__}")
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"'{field}' in {context} must be a number, got: {type(value).__name__}"
+        ) from exc
     if num < 0:
         raise ValueError(f"'{field}' in {context} must be non-negative, got: {num}")
     return num
 
 
-def _parse_params(data: Dict[str, Any]) -> ProductionParams:
+def _parse_params(data: dict[str, Any]) -> ProductionParams:
     """Parse JSON data into ProductionParams with validation.
-    
-    Supports both old format (line_id, sku_id, compatible_skus) and 
+
+    Supports both old format (line_id, sku_id, compatible_skus) and
     new format (name as primary, sku.line_speeds).
     """
-    
+
     # Validate top-level structure
     if not isinstance(data, dict):
         raise ValueError(f"Expected JSON object, got: {type(data).__name__}")
-    
+
     # Get global settings
     settings = data.get("settings", {})
     default_changeover = settings.get("changeover_minutes", settings.get("default_changeover_minutes", 120))
-    
+
     # Parse production lines first (needed to derive sku compatibility)
     lines = []
     line_name_to_id = {}  # Map line names to IDs for new format
-    
+
     for i, line_data in enumerate(data.get("lines", [])):
         # Support both old format (line_id) and new format (name only)
         line_id = line_data.get("line_id", line_data.get("name", f"LINE-{i+1}"))
         line_name = line_data.get("name", line_id)
         line_name_to_id[line_name] = line_id
-        
+
         lines.append(ProductionLine(
             line_id=line_id,
             name=line_name,
@@ -105,24 +107,24 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
             efficiency_percent=line_data.get("efficiency_percent", 100.0),
             downtime_windows=[(w["start_hour"], w["end_hour"]) for w in line_data.get("downtime_windows", [])],
         ))
-    
+
     # Parse SKUs
     skus = []
     sku_line_speeds = {}  # Store line_speeds for later processing
-    
+
     for i, sku_data in enumerate(data.get("skus", [])):
         due_date = None
         if "due_date" in sku_data:
             due_date = datetime.fromisoformat(sku_data["due_date"])
-        
+
         # Support both old format (sku_id) and new format (name only)
         sku_id = sku_data.get("sku_id", sku_data.get("name", f"SKU-{i+1}"))
         sku_name = sku_data.get("name", sku_id)
-        
+
         # Store line_speeds if present (new format)
         if "line_speeds" in sku_data:
             sku_line_speeds[sku_id] = sku_data["line_speeds"]
-        
+
         skus.append(SKU(
             sku_id=sku_id,
             name=sku_name,
@@ -134,26 +136,26 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
             underage_buffer_pct=sku_data.get("underage_buffer_pct", 0.0),
             overage_buffer_pct=sku_data.get("overage_buffer_pct", 0.0),
         ))
-    
+
     # If using new format (sku.line_speeds), update lines with compatible_skus and speed multipliers
     if sku_line_speeds:
         for line in lines:
             compatible = []
             speed_multipliers = {}
-            
+
             for sku_id, line_speeds in sku_line_speeds.items():
                 # line_speeds uses line names as keys in new format
                 speed = line_speeds.get(line.name, line_speeds.get(line.line_id, 0))
                 if speed > 0:
                     compatible.append(sku_id)
                     speed_multipliers[sku_id] = speed
-            
+
             # Update line with derived data
             line.compatible_skus = compatible
             line.sku_speed_multipliers = speed_multipliers
             line.base_speed_units_per_hour = 1.0  # Use multipliers for actual speeds
-    
-    # Parse changeover matrices
+
+    # Parse changeover matrices (if omitted, propagate settings.changeover_minutes per line)
     changeover_matrices = []
     for matrix_data in data.get("changeover_matrices", []):
         # Convert string keys to tuples
@@ -162,12 +164,12 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
             # Key format: "SKU-001,SKU-002"
             from_sku, to_sku = key.split(",")
             minutes[(from_sku.strip(), to_sku.strip())] = value
-        
+
         cost = {}
         for key, value in matrix_data.get("changeover_cost", {}).items():
             from_sku, to_sku = key.split(",")
             cost[(from_sku.strip(), to_sku.strip())] = value
-        
+
         changeover_matrices.append(ChangeoverMatrix(
             line_id=matrix_data.get("line_id", matrix_data.get("name", "")),
             changeover_minutes=minutes,
@@ -175,17 +177,27 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
             default_minutes=matrix_data.get("default_minutes", default_changeover),
             default_cost=matrix_data.get("default_cost", 100.0),
         ))
-    
+
+    if not changeover_matrices and ("changeover_minutes" in settings or "default_changeover_minutes" in settings):
+        for line in lines:
+            changeover_matrices.append(
+                ChangeoverMatrix(
+                    line_id=line.line_id,
+                    default_minutes=float(default_changeover),
+                    default_cost=100.0,
+                )
+            )
+
     # Parse shifts
     shifts = []
     for i, shift_data in enumerate(data.get("shifts", [])):
         start_parts = shift_data["start_time"].split(":")
         end_parts = shift_data["end_time"].split(":")
-        
+
         # Support both old format (shift_id) and new format (name only)
         shift_id = shift_data.get("shift_id", shift_data.get("name", f"SHIFT-{i+1}"))
         shift_name = shift_data.get("name", shift_id)
-        
+
         # Get available lines - in new format, use all line IDs if not specified
         available_lines = shift_data.get("available_lines", [])
         if not available_lines:
@@ -193,21 +205,22 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
             available_lines = [line.line_id for line in lines]
         else:
             # Map line names to IDs if needed
-            available_lines = [line_name_to_id.get(l, l) for l in available_lines]
-        
+            available_lines = [line_name_to_id.get(ref, ref) for ref in available_lines]
+
         shifts.append(Shift(
             shift_id=shift_id,
             name=shift_name,
             start_time=time(int(start_parts[0]), int(start_parts[1])),
             end_time=time(int(end_parts[0]), int(end_parts[1])),
             available_lines=available_lines,
+            day_of_week=shift_data.get("day_of_week"),
         ))
-    
+
     # Parse start date
     start_date = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
     if "start_date" in data:
         start_date = datetime.fromisoformat(data["start_date"])
-    
+
     # Create params
     params = ProductionParams(
         lines=lines,
@@ -221,7 +234,7 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
         w_utilization=data.get("w_utilization", 0.5),
         w_priority=data.get("w_priority", 2.0),
     )
-    
+
     params.validate()
     return params
 
@@ -233,21 +246,21 @@ def _parse_params(data: Dict[str, Any]) -> ProductionParams:
 def save_to_json(params: ProductionParams, file_path: str) -> None:
     """
     Save production parameters to a JSON file.
-    
+
     Args:
         params: Parameters to save
         file_path: Output file path
     """
     data = _params_to_dict(params)
-    
+
     path = Path(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, default=str)
 
 
-def _params_to_dict(params: ProductionParams) -> Dict[str, Any]:
+def _params_to_dict(params: ProductionParams) -> dict[str, Any]:
     """Convert ProductionParams to a JSON-serializable dict."""
     data = {
         "planning_horizon_days": params.planning_horizon_days,
@@ -261,7 +274,7 @@ def _params_to_dict(params: ProductionParams) -> Dict[str, Any]:
         "changeover_matrices": [],
         "shifts": [],
     }
-    
+
     # Lines
     for line in params.lines:
         data["lines"].append({
@@ -274,7 +287,7 @@ def _params_to_dict(params: ProductionParams) -> Dict[str, Any]:
             "cleaning_time_minutes": line.cleaning_time_minutes,
             "efficiency_percent": line.efficiency_percent,
         })
-    
+
     # SKUs
     for sku in params.skus:
         sku_dict = {
@@ -290,12 +303,12 @@ def _params_to_dict(params: ProductionParams) -> Dict[str, Any]:
         if sku.due_date:
             sku_dict["due_date"] = sku.due_date.isoformat()
         data["skus"].append(sku_dict)
-    
+
     # Changeover matrices
     for matrix in params.changeover_matrices:
         minutes = {f"{k[0]},{k[1]}": v for k, v in matrix.changeover_minutes.items()}
         cost = {f"{k[0]},{k[1]}": v for k, v in matrix.changeover_cost.items()}
-        
+
         data["changeover_matrices"].append({
             "line_id": matrix.line_id,
             "changeover_minutes": minutes,
@@ -303,17 +316,20 @@ def _params_to_dict(params: ProductionParams) -> Dict[str, Any]:
             "default_minutes": matrix.default_minutes,
             "default_cost": matrix.default_cost,
         })
-    
+
     # Shifts
     for shift in params.shifts:
-        data["shifts"].append({
+        shift_dict = {
             "shift_id": shift.shift_id,
             "name": shift.name,
             "start_time": shift.start_time.strftime("%H:%M"),
             "end_time": shift.end_time.strftime("%H:%M"),
             "available_lines": shift.available_lines,
-        })
-    
+        }
+        if shift.day_of_week is not None:
+            shift_dict["day_of_week"] = shift.day_of_week
+        data["shifts"].append(shift_dict)
+
     return data
 
 
@@ -324,7 +340,7 @@ def _params_to_dict(params: ProductionParams) -> Dict[str, Any]:
 def save_solution_json(solution: ScheduleSolution, file_path: str) -> None:
     """
     Save a schedule solution to JSON.
-    
+
     Args:
         solution: Solution to save
         file_path: Output file path
@@ -335,14 +351,14 @@ def save_solution_json(solution: ScheduleSolution, file_path: str) -> None:
         "total_changeovers": solution.get_total_changeovers(),
         "line_solutions": [],
     }
-    
+
     for ls in solution.line_solutions:
         line_data = {
             "line_id": ls.line_id,
             "total_units": ls.get_total_units(),
             "blocks": [],
         }
-        
+
         for block in ls.production_blocks:
             line_data["blocks"].append({
                 "block_id": block.block_id,
@@ -353,11 +369,11 @@ def save_solution_json(solution: ScheduleSolution, file_path: str) -> None:
                 "changeover_from": block.changeover_from,
                 "changeover_time_minutes": block.changeover_time_minutes,
             })
-        
+
         data["line_solutions"].append(line_data)
-    
+
     path = Path(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)

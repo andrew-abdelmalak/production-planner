@@ -1,3 +1,3 @@
 """
-app package - PyQt6 Desktop Application
+app package - PySide6 Desktop Application and CLI
 """

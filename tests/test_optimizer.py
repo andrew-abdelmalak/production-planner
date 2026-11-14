@@ -3,11 +3,11 @@ test_optimizer.py - Tests for Genetic Optimizer
 """
 
 import unittest
-from datetime import datetime
 
+from core.constraints import validate_solution
 from core.params import make_demo_params
 from optimizer.genetic import GeneticOptimizer
-from core.constraints import validate_solution
+
 
 class TestGeneticOptimizer(unittest.TestCase):
     def setUp(self):
@@ -16,34 +16,34 @@ class TestGeneticOptimizer(unittest.TestCase):
         # Reduce demand to make test faster
         for sku in self.params.skus:
             sku.demand_units = sku.min_batch_size * 2
-            
+
     def test_optimizer_feasibility(self):
         # Use small population/gens for speed
         optimizer = GeneticOptimizer(
-            self.params, 
-            population_size=10, 
+            self.params,
+            population_size=10,
             generations=5
         )
         solution = optimizer.solve()
-        
+
         self.assertIsNotNone(solution)
         is_feasible, violations = validate_solution(solution)
         self.assertTrue(is_feasible, f"Solution infeasible: {violations}")
-        
+
     def test_makespan(self):
         optimizer = GeneticOptimizer(
-            self.params, 
-            population_size=10, 
+            self.params,
+            population_size=10,
             generations=5
         )
         solution = optimizer.solve()
         makespan = solution.get_makespan_hours()
         self.assertGreater(makespan, 0)
-        
+
     def test_total_units(self):
         optimizer = GeneticOptimizer(
-            self.params, 
-            population_size=10, 
+            self.params,
+            population_size=10,
             generations=5
         )
         solution = optimizer.solve()

@@ -1,0 +1,6 @@
+sku_id,name,demand_units,priority,min_batch_size,starting_stock,due_date,underage_buffer_pct,overage_buffer_pct
+SKU-001,Water 500ml,20000,1,500,0,,0.0,0.0
+SKU-002,Sparkling Water,15000,2,500,0,,0.0,0.0
+SKU-003,Orange Juice,10000,2,500,0,,0.0,0.0
+SKU-004,Cola 500ml,12000,3,500,0,,0.0,0.0
+SKU-005,Water 1.5L,8000,3,400,0,,0.0,0.0

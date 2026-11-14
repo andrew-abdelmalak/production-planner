@@ -4,47 +4,51 @@ Supply Chain Planner - Desktop Application
 Main entry point for the PySide6 desktop application.
 """
 
-import sys
 import logging
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt
+import sys
 
-from app.main_window import MainWindow
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('supply_chain_planner.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
 logger = logging.getLogger(__name__)
+
+
+def configure_logging() -> None:
+    """Configure console logging for interactive GUI execution."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
 
 
 def main():
     """Launch the Supply Chain Planner desktop application."""
+    try:
+        from PySide6.QtCore import Qt
+        from PySide6.QtWidgets import QApplication
+    except ImportError as exc:
+        raise SystemExit(
+            "PySide6 is required for the desktop GUI. Install with: uv sync --extra gui"
+        ) from exc
+
+    from app.main_window import MainWindow
+
+    configure_logging()
     logger.info("Starting Supply Chain Planner application...")
-    
-    # Enable high DPI scaling
+
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
-    
+
     app = QApplication(sys.argv)
     app.setApplicationName("Supply Chain Planner")
-    app.setOrganizationName("Optimization Project")
-    
+    app.setOrganizationName("Production Planner")
+
     logger.info("Qt application initialized")
-    
-    # Apply dark theme
     app.setStyle("Fusion")
-    
+
     logger.info("Creating main window...")
     window = MainWindow()
     window.show()
-    
+
     logger.info("Main window shown, starting event loop...")
     sys.exit(app.exec())
 

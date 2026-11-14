@@ -9,15 +9,17 @@ import os
 import subprocess
 import sys
 
+
 def build():
     """Build the application using PyInstaller."""
     print("=" * 50)
     print("Building Supply Chain Planner")
     print("=" * 50)
-    
-    # Base directory
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    
+
+    # Base directory (repo root)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sep = os.pathsep
+
     # PyInstaller command
     cmd = [
         sys.executable, "-m", "PyInstaller",
@@ -25,22 +27,21 @@ def build():
         "--onefile",
         "--windowed",
         "--clean",
-        # Add icon if it exists
-        # "--icon", "app/resources/icon.ico",
         # Include data files
-        "--add-data", f"examples;examples",
+        "--add-data", f"examples{sep}examples",
+        "--add-data", f"templates{sep}templates",
         # Hidden imports
-        "--hidden-import", "PyQt6.QtCore",
-        "--hidden-import", "PyQt6.QtWidgets", 
-        "--hidden-import", "PyQt6.QtGui",
+        "--hidden-import", "PySide6.QtCore",
+        "--hidden-import", "PySide6.QtWidgets",
+        "--hidden-import", "PySide6.QtGui",
         # Entry point
-        os.path.join(base_dir, "app", "main.py")
+        os.path.join(base_dir, "app", "main.py"),
     ]
-    
+
     print(f"\nRunning: {' '.join(cmd)}\n")
-    
+
     result = subprocess.run(cmd, cwd=base_dir)
-    
+
     if result.returncode == 0:
         print("\n" + "=" * 50)
         print("✅ Build successful!")
